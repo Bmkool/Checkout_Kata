@@ -12,12 +12,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Main program
-set(MAIN_SRC_FILES Main.cpp)
-add_executable(checkout ${MAIN_SRC_FILES})
-target_compile_options(checkout PRIVATE -Wall -Wextra)
-
 # Unit Tests
 set(TEST_SRC_FILES CheckoutTests.cpp)
 add_executable(checkout_tests ${TEST_SRC_FILES})
 target_link_libraries(checkout_tests gtest_main)
+target_compile_options(checkout_tests PRIVATE -Wall -Wextra)

@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
+#include <optional>
 
 #include "Item.hpp"
 #include "ItemDatabase.hpp"
+#include "Order.hpp"
 
 TEST(ItemTests, GetItemName) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
@@ -34,4 +36,30 @@ TEST(DatabaseTests, InsertSameItemIntoDatabaseFail) {
     ASSERT_TRUE(db.insertItem(chip));
     ASSERT_FALSE(db.insertItem(chip));
 
+}
+
+TEST(DatabaseTests, GetItemPriceFailSucceed) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    ASSERT_FALSE(db.getItemPrice("Chips").has_value());
+
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_FLOAT_EQ(3, db.getItemPrice("Chips").value());
+}
+
+TEST(DatabaseTests, SetItemPriceInvalid) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_FALSE(db.setItemPrice("Chips", 2));
+
+    // Invalid price
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_FALSE(db.setItemPrice("Chips", -2));
+
+    // Valid
+    ASSERT_TRUE(db.setItemPrice("Chips", 2.5));
+    ASSERT_FLOAT_EQ(2.5, db.getItemPrice("Chips").value());
 }

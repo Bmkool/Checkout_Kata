@@ -3,9 +3,7 @@
 #include <cmath>
 
 Item::Item(std::string name, Sale_t type, float price) :
-    mName(name), mType(type), mPrice(fabs(price))
-{
-}
+    mName(name), mType(type), mPrice(fabs(price)) {}
 
 const std::string& Item::getName() const {
     return mName;

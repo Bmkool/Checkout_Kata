@@ -74,8 +74,8 @@ bool Order::ScanItem(const std::string& name, float weight) {
 float Order::getItemTotalPrice(const Item& item, const std::variant<int, float>& amt) const
 {
     if (Item::Sale_t::Unit == item.getSaleType()) {
-        return item.getPrice() * std::get<int>(amt);
+        return (item.getPrice() - item.getMarkdown()) * std::get<int>(amt);
     } else {
-        return item.getPrice() * std::get<float>(amt);
+        return (item.getPrice() - item.getMarkdown()) * std::get<float>(amt);
     }
 }

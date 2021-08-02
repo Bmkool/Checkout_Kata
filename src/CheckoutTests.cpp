@@ -199,3 +199,25 @@ TEST(OrderTests, ScanItemWightAddToCartTwice) {
     ASSERT_TRUE(ord.ScanItem("Apple", .25));
     ASSERT_FLOAT_EQ(1.5 * (.5 + .25), ord.getTotalPrice());;
 }
+
+// Use Case #3a
+TEST(OrderTests, ScanItemUnitMarkdown) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    db.setItemMarkdown("Chips", .5);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3-.5, ord.getTotalPrice());
+}
+
+// Use Case #3b
+TEST(OrderTests, ScanItemWeightMarkdown) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    db.setItemMarkdown("Apple", .25);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+    ASSERT_FLOAT_EQ((1.5 - .25) * .5, ord.getTotalPrice());
+}

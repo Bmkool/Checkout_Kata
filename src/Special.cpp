@@ -1,6 +1,7 @@
 #include "Special.hpp"
 
 #include <iostream>
+#include <cmath>
 
 BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent) :
     Special(needed), mReceive(receive)
@@ -14,7 +15,12 @@ BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, fl
 }
 
 
+
 float BuyOneGetOneUnit::calcPrice(unsigned int numItems, float price) {
+    if (price < 0) {
+        std::cerr << "Negative price entered. Using absolute value" << std::endl;
+        price = fabs(price);
+    }
     // Find how many specials are applicable
     unsigned int specials = numItems / (mNeeded + mReceive);
 

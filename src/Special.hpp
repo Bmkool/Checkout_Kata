@@ -7,7 +7,8 @@ public:
     // Constructor
     Special(unsigned int needed) : mNeeded(needed) {};
     virtual ~Special() {};
-    // Returns total price of the items after the special
+    // Returns total price of the items after the special. If price is negative
+    // absolute value of price is used
     virtual float calcPrice(unsigned int numItems, float price) = 0;
 
 protected:
@@ -19,7 +20,7 @@ class BuyOneGetOneUnit : public Special {
 public:
     // Constructor. PercentOff must be between [0, 100] else a default of 0% off is used.
     BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent);
-    float calcPrice(unsigned int numItems, float price);
+    float calcPrice(unsigned int numItems, float price) override;
 
 private:
     unsigned int mReceive;  // How many items receive the discount

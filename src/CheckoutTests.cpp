@@ -30,6 +30,31 @@ TEST(ItemTests, GetSetPrice) {
     ASSERT_FLOAT_EQ(2.5, chip.getPrice());
 }
 
+TEST(ItemTests, InvalidMarkdown) {
+    // Negative price gets set to absolute value
+    Item chip("Chips", Item::Sale_t::Unit, -3);
+    ASSERT_FLOAT_EQ(0, chip.getMarkdown());
+
+    // Negative markdown doesnt change current markdown
+    ASSERT_FALSE(chip.setMarkdown(-1));
+    ASSERT_FLOAT_EQ(0, chip.getMarkdown());
+
+    // Markdown cant be greater than current price
+    ASSERT_FALSE(chip.setMarkdown(chip.getPrice() + .01));
+    ASSERT_FLOAT_EQ(0, chip.getMarkdown());
+}
+
+TEST(ItemTests, ValidMarkdown) {
+    // Negative price gets set to absolute value
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+
+    ASSERT_TRUE(chip.setMarkdown(.5));
+    ASSERT_FLOAT_EQ(.5, chip.getMarkdown());
+
+    // Markdown doesnt change base price
+    ASSERT_EQ(3, chip.getPrice());
+}
+
 TEST(DatabaseTests, InsertIntoDatabase) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ItemDatabase db;
@@ -59,16 +84,12 @@ TEST(DatabaseTests, GetItemSuccess) {
     ASSERT_TRUE(db.getItem("Chips").has_value());
 }
 
-TEST(DatabaseTests, SetItemPriceNotInDatabaseAndPriceInvalid) {
+TEST(DatabaseTests, SetItemPriceNotInDatabase) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ItemDatabase db;
 
     // Not in database
     ASSERT_FALSE(db.setItemPrice("Chips", 2));
-
-    // Invalid price
-    ASSERT_TRUE(db.insertItem(chip));
-    ASSERT_FALSE(db.setItemPrice("Chips", -2));
 }
 
 TEST(DatabaseTests, SetItemPriceSuccess) {
@@ -80,6 +101,22 @@ TEST(DatabaseTests, SetItemPriceSuccess) {
     ASSERT_FLOAT_EQ(2.5, db.getItem("Chips").value().getPrice());
 }
 
+TEST(DatabaseTests, SetItemMarkdownNotInDatabase) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_FALSE(db.setItemMarkdown("Chips", 2));
+}
+
+TEST(DatabaseTests, SetItemMarkdownSuccess) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_TRUE(db.setItemMarkdown("Chips", 2.5));
+    ASSERT_FLOAT_EQ(2.5, db.getItem("Chips").value().getMarkdown());
+}
 
 TEST(OrderTests, ScanItemUnitNotInDatabase) {
     ItemDatabase db;

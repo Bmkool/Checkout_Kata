@@ -25,10 +25,17 @@ public:
     // Set price of item. New price cannot be negative. Returns success of operation
     bool setPrice(float newPrice);
 
+    // Return markdown of item
+    float getMarkdown() const;
+
+    // Set markdown of item. New markdown cannot be negative or greater than base price. Returns success of operation
+    bool setMarkdown(float newMarkdown);
+
 private:
     std::string mName; // Name of item
     Sale_t mType;   // Sale type
     float mPrice;   // Price in dollars per unit or per pound
+    float mMarkdown;    // Amount in dollars to lower price
 };
 
 #endif

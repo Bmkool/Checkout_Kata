@@ -31,3 +31,13 @@ bool ItemDatabase::setItemPrice(const std::string& name, float price) {
     return item->setPrice(price);
 }
 
+bool ItemDatabase::setItemMarkdown(const std::string& name, float markdown) {
+    // Find item in database
+    auto item = std::find_if(mItems.begin(), mItems.end(), [&name](const Item& obj) { return obj.getName() == name; });
+    if (item == mItems.end()) {
+        // Item not in database
+        return false;
+    }
+
+    return item->setMarkdown(markdown);
+}

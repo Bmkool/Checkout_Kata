@@ -51,7 +51,7 @@ private:
  *  NforX : Special
  *  - float price
  *
- *  Class Item(Name, Sale_t, Base Price, Markdown = 0, Special=nullptr)
+ *  Class Item(Name, Sale_t, Base Price)
  *  Members:
  *  - Name
  *  - Sale_t

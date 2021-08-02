@@ -23,6 +23,10 @@ public:
     // must be in database
     bool setItemPrice(const std::string& name, float price);
 
+    // Set a new markdown for a desired item name. Markdown must be positive, less than base price
+    // and item must be in database
+    bool setItemMarkdown(const std::string& name, float price);
+
 private:
     std::vector<Item> mItems; // Items in database
 };

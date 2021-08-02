@@ -17,6 +17,7 @@ set(TEST_SRC_FILES  CheckoutTests.cpp
                     Item.cpp
                     ItemDatabase.cpp
                     Order.cpp
+                    Special.cpp
 )
 add_executable(checkout_tests ${TEST_SRC_FILES})
 target_link_libraries(checkout_tests gtest_main)

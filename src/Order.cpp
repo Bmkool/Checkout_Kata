@@ -1,11 +1,10 @@
 #include "Order.hpp"
 
 #include <optional>
+#include <iostream>
 
 Order::Order(const ItemDatabase& db) :
-    mDatabase(db),
-    mTotalPrice(0),
-    mCart{}
+    mDatabase(db), mTotalPrice(0), mCart{}
 {}
 
 float Order::getTotalPrice() const {
@@ -16,11 +15,13 @@ bool Order::ScanItem(const std::string& name) {
     // Item must be in database
     auto item = mDatabase.getItem(name);
     if (!item.has_value()) {
+        std::cerr << "Item not in database" << std::endl;
         return false;
     }
 
     // Item must be sold by unit
     if (Item::Sale_t::Unit != item->getSaleType()) {
+        std::cerr << "Item not sold by unit" << std::endl;
         return false;
     }
 
@@ -42,17 +43,20 @@ bool Order::ScanItem(const std::string& name) {
 bool Order::ScanItem(const std::string& name, float weight) {
     // Weight must be positive and non zero
     if (weight <= 0) {
+        std::cerr << "Weight must be positive and non-zero" << std::endl;
         return false;
     }
 
     // Item must be in database
     auto item = mDatabase.getItem(name);
     if (!item.has_value()) {
+        std::cerr << "Item not in database" << std::endl;
         return false;
     }
 
     // Item must be sold by weight
     if (Item::Sale_t::Weight != item->getSaleType()) {
+        std::cerr << "Item not sold by weight" << std::endl;
         return false;
     }
 
@@ -75,23 +79,27 @@ bool Order::RemoveItem(const std::string& name, unsigned int qty) {
     // Item must be in order
     auto cart_it = mCart.find(name);
     if (cart_it == mCart.end()) {
+        std::cerr << "Item not found in order" << std::endl;
         return false;
     }
 
     // Grab item info from database
     auto item = mDatabase.getItem(name);
     if (!item.has_value()) {
+        std::cerr << "Item not in database" << std::endl; // shouldnt be possible
         return false;
     }
 
     // Item must be sold by unit
     if (Item::Sale_t::Unit != item->getSaleType()) {
+        std::cerr << "Item not sold by unit" << std::endl;
         return false;
     }
 
     // Quantity must be at least one
     unsigned int curQty = std::get<unsigned int>(cart_it->second);
     if (qty == 0) {
+        std::cerr << "Removal quantity cannot be zero" << std::endl;
         return false;
     }
 
@@ -115,23 +123,27 @@ bool Order::RemoveItem(const std::string& name, float weight) {
     // Item must be in order
     auto cart_it = mCart.find(name);
     if (cart_it == mCart.end()) {
+        std::cerr << "Item not found in order" << std::endl;
         return false;
     }
 
     // Grab item info from database
     auto item = mDatabase.getItem(name);
     if (!item.has_value()) {
+        std::cerr << "Item not in database" << std::endl; // shouldnt be possible
         return false;
     }
 
     // Item must be sold by unit
     if (Item::Sale_t::Weight != item->getSaleType()) {
+        std::cerr << "Item not sold by weight" << std::endl;
         return false;
     }
 
     // Quantity must be at least one and not greater than the current quantity in the cart
     float curWeight = std::get<float>(cart_it->second);
     if (weight <= 0) {
+        std::cerr << "Removal quantity must be greater than zero" << std::endl;
         return false;
     }
 

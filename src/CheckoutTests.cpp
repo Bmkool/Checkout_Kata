@@ -4,6 +4,7 @@
 #include "Item.hpp"
 #include "ItemDatabase.hpp"
 #include "Order.hpp"
+#include "Special.hpp"
 
 TEST(ItemTests, GetItemName) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
@@ -332,3 +333,77 @@ TEST(OrderTests, RemoveItemWeightSuccessfulStillRemainingInOrder) {
 }
 
 // Remove weight special
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercent) {
+    int numNeeded = 2;
+    int numReceived = 1;
+    float percentOff = 101; // Over 100%
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    int numItems = 3;
+    int price = 1;
+
+    float total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ(numItems * price, total);
+    delete sp;
+
+    percentOff = -10; // Negative percent
+    sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ(numItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitNotEnough) {
+    int numNeeded = 2;
+    int numReceived = 1;
+    float percentOff = 100;
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    int numItems = 2;
+    int price = 1;
+
+    float total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ(numItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitExactAmount) {
+    int numNeeded = 2;
+    int numReceived = 1;
+    float percentOff = 100;
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    int numItems = 3;
+    int price = 1;
+
+    float total = sp->calcPrice(numItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((numItems - 1) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitExtraAmount) {
+    int numNeeded = 2;
+    int numReceived = 1;
+    float percentOff = 100;
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    int numItems = 4;
+    int price = 1;
+
+    float total = sp->calcPrice(numItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((numItems - 1) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitExtraAmountMultipleSpecials) {
+    int numNeeded = 2;
+    int numReceived = 1;
+    float percentOff = 100;
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    int numItems = 7;
+    int price = 1;
+
+    float total = sp->calcPrice(numItems, price);
+    // Two specials received
+    ASSERT_FLOAT_EQ((numItems - 2) * price, total);
+    delete sp;
+}

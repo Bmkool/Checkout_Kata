@@ -81,9 +81,84 @@ TEST(DatabaseTests, SetItemPriceSuccess) {
 }
 
 
-TEST(OrderTests, ScanItemNotInDatabase) {
+TEST(OrderTests, ScanItemUnitNotInDatabase) {
     ItemDatabase db;
     Order ord(db);
 
     ASSERT_FALSE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+}
+
+TEST(OrderTests, ScanItemUnitWrongType) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.49});
+    Order ord(db);
+
+    ASSERT_FALSE(ord.ScanItem("Apple"));
+}
+
+// Use Case #1
+TEST(OrderTests, ScanItemUnitAddToCart) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
+}
+
+TEST(OrderTests, ScanItemUnitAddToCartTwice) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
+}
+
+TEST(OrderTests, ScanItemWeightNotInDatabase) {
+    ItemDatabase db;
+    Order ord(db);
+
+    ASSERT_FALSE(ord.ScanItem("Apple", 1.0));
+    ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+}
+
+TEST(OrderTests, ScanItemWeightInvalid) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    db.insertItem({"Orange", Item::Sale_t::Weight, 2});
+    Order ord(db);
+
+    ASSERT_FALSE(ord.ScanItem("Apple", 0));
+    ASSERT_FALSE(ord.ScanItem("Orange", -.1));
+}
+
+TEST(OrderTests, ScanItemWeightWrongType) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    Order ord(db);
+
+    ASSERT_FALSE(ord.ScanItem("Chips", 1.0));
+}
+
+// Use Case #2
+TEST(OrderTests, ScanItemWeightAddToCart) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+    ASSERT_FLOAT_EQ(1.5 * .5, ord.getTotalPrice());
+}
+
+TEST(OrderTests, ScanItemWightAddToCartTwice) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+    ASSERT_TRUE(ord.ScanItem("Apple", .25));
+    ASSERT_FLOAT_EQ(1.5 * (.5 + .25), ord.getTotalPrice());;
 }

@@ -3,6 +3,7 @@
 
 #include "ItemDatabase.hpp"
 
+#include <string>
 #include <unordered_map>
 #include <variant>
 
@@ -12,9 +13,20 @@ public:
     // Constructor. All items that can be added to the order must be in the ItemDatabase
     Order(const ItemDatabase& db);
 
+    // Return total price of the order
+    float getTotalPrice() const;
+
     // Scans item by unit into cart and updates order total. Item must exist in database and
     // be sold by unit. Returns status of operation.
     bool ScanItem(const std::string& name);
+
+    // Scans item by weight into cart and updates order total. Item must exist in database and
+    // be sold by weight. Weight must be > 0. Returns status of operation and updates total price when successful.
+    bool ScanItem(const std::string& name, float weight);
+
+private:
+    // Get the total price of the item based on amount
+    float getItemTotalPrice(const Item& item, const std::variant<int, float>& amt) const;
 
 private:
     // Database of available items

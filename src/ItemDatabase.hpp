@@ -17,7 +17,7 @@ public:
 
     // Insert new item into database. Item names must be unique and not already
     // in database. Return status of operation.
-    bool insertItem(Item item);
+    bool insertItem(const Item& item);
 
     // Set a new price for a desired item name. Price must be positive and item
     // must be in database

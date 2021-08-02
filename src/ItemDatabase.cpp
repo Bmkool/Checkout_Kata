@@ -10,9 +10,9 @@ std::optional<Item> ItemDatabase::getItem(const std::string& name) const {
     return *it;
 }
 
-bool ItemDatabase::insertItem(Item item) {
+bool ItemDatabase::insertItem(const Item& item) {
     // Check to make sure item isn't already in database
-    if (std::nullopt != getItem(item.getName())) {
+    if (getItem(item.getName()).has_value()) {
         return false;
     }
 

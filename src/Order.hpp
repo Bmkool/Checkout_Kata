@@ -1,6 +1,31 @@
 #ifndef __ORDER_HPP__
 #define __ORDER_HPP__
 
+#include "ItemDatabase.hpp"
+
+#include <unordered_map>
+#include <variant>
+
+class Order
+{
+public:
+    // Constructor. All items that can be added to the order must be in the ItemDatabase
+    Order(const ItemDatabase& db);
+
+    // Scans item by unit into cart and updates order total. Item must exist in database and
+    // be sold by unit. Returns status of operation.
+    bool ScanItem(const std::string& name);
+
+private:
+    // Database of available items
+    const ItemDatabase& mDatabase;
+    // Price of order
+    float mTotalPrice;
+    // Items that have been scanned into the cart and the corresponding total quantity or weight per item
+    std::unordered_map<std::string, std::variant<int, float>> mCart;
+};
+
+#endif
 
 /* Initial Outline
  *  Enum Sale_t { Unit, Weight }
@@ -26,9 +51,9 @@
  *  - vector<Item> database
  *  API:
  *  - InsertItemIntoDatabase(Item)
- *  - SetPrice(Name, NewPrice)
- *  - SetMarkdown(Name, Discount)
- *  - SetSpecial(Name, Special)
+ *  - SetItemPrice(Name, NewPrice)
+ *  - SetItemMarkdown(Name, Discount)
+ *  - SetItemSpecial(Name, Special)
  *
  *  Class Order(const Database&):
  *  Members:
@@ -44,4 +69,3 @@
  *  - getTotal()
  *
 */
-#endif

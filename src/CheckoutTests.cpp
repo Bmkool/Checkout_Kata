@@ -10,6 +10,12 @@ TEST(ItemTests, GetItemName) {
     ASSERT_EQ("Chips", chip.getName());
 }
 
+
+TEST(ItemTests, GetItemSaleType) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ASSERT_EQ(Item::Sale_t::Unit, chip.getSaleType());
+}
+
 TEST(ItemTests, GetSetPrice) {
     // Negative price gets set to absolute value
     Item chip("Chips", Item::Sale_t::Unit, -3);
@@ -38,17 +44,22 @@ TEST(DatabaseTests, InsertSameItemIntoDatabaseFail) {
 
 }
 
-TEST(DatabaseTests, GetItemPriceFailSucceed) {
+TEST(DatabaseTests, GetItemNotInDatabase) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ItemDatabase db;
 
-    ASSERT_FALSE(db.getItemPrice("Chips").has_value());
-
-    ASSERT_TRUE(db.insertItem(chip));
-    ASSERT_FLOAT_EQ(3, db.getItemPrice("Chips").value());
+    ASSERT_FALSE(db.getItem("Chips").has_value());
 }
 
-TEST(DatabaseTests, SetItemPriceInvalid) {
+TEST(DatabaseTests, GetItemSuccess) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_TRUE(db.getItem("Chips").has_value());
+}
+
+TEST(DatabaseTests, SetItemPriceNotInDatabaseAndPriceInvalid) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ItemDatabase db;
 
@@ -58,8 +69,21 @@ TEST(DatabaseTests, SetItemPriceInvalid) {
     // Invalid price
     ASSERT_TRUE(db.insertItem(chip));
     ASSERT_FALSE(db.setItemPrice("Chips", -2));
+}
 
-    // Valid
+TEST(DatabaseTests, SetItemPriceSuccess) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    ASSERT_TRUE(db.insertItem(chip));
     ASSERT_TRUE(db.setItemPrice("Chips", 2.5));
-    ASSERT_FLOAT_EQ(2.5, db.getItemPrice("Chips").value());
+    ASSERT_FLOAT_EQ(2.5, db.getItem("Chips").value().getPrice());
+}
+
+
+TEST(OrderTests, ScanItemNotInDatabase) {
+    ItemDatabase db;
+    Order ord(db);
+
+    ASSERT_FALSE(ord.ScanItem("Chips"));
 }

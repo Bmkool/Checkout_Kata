@@ -16,12 +16,14 @@ public:
     // Return name of item
     const std::string& getName() const;
 
+    // Return Sale type of Item
+    Sale_t getSaleType() const;
+
     // Return price of item
     float getPrice() const;
 
     // Set price of item. New price cannot be negative. Returns success of operation
     bool setPrice(float newPrice);
-
 
 private:
     std::string mName; // Name of item

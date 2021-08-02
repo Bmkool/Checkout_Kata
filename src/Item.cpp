@@ -9,6 +9,10 @@ const std::string& Item::getName() const {
     return mName;
 }
 
+Item::Sale_t Item::getSaleType() const {
+    return mType;
+}
+
 float Item::getPrice() const {
     return mPrice;
 }

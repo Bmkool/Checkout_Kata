@@ -25,8 +25,14 @@ public:
     bool ScanItem(const std::string& name, float weight);
 
     // Removes item from cart by quantity and updates order total. Item must exist in order and
-    // be sold by unit, and quantity must be at least 1.  Returns status of operation and updates total price when successful.
+    // be sold by unit, and quantity must be greater than 0. If quantity is greater than current total in cart the excess will be ignored and item removed.
+    // Returns status of operation and updates total price when successful.
     bool RemoveItem(const std::string& name, unsigned int qty);
+
+    // Removes item from cart by weight and updates order total. Item must exist in order and
+    // be sold by weight, and weight must greater than 0. If weight is greater than current total in cart the excess will be ignored and item removed.
+    // Returns status of operation and updates total price when successful.
+    bool RemoveItem(const std::string& name, float weight);
 
 private:
     // Get the total price of the item based on amount
@@ -79,7 +85,6 @@ private:
  *  API:
  *  - ScanItem(Name)
  *  - ScanItem(Name, Weight)
- *  - RemoveItem(Name) // Removes all qty/weight from order
  *  - RemoveItem(Name, Qty)
  *  - RemoveItem(Name, Weight)
  *  - getTotal()

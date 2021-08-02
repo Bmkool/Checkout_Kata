@@ -158,7 +158,7 @@ TEST(OrderTests, ScanItemWeightNotInDatabase) {
     ItemDatabase db;
     Order ord(db);
 
-    ASSERT_FALSE(ord.ScanItem("Apple", 1.0));
+    ASSERT_FALSE(ord.ScanItem("Apple", 1.0f));
     ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
 }
 
@@ -168,8 +168,8 @@ TEST(OrderTests, ScanItemWeightInvalid) {
     db.insertItem({"Orange", Item::Sale_t::Weight, 2});
     Order ord(db);
 
-    ASSERT_FALSE(ord.ScanItem("Apple", 0));
-    ASSERT_FALSE(ord.ScanItem("Orange", -.1));
+    ASSERT_FALSE(ord.ScanItem("Apple", 0.0f));
+    ASSERT_FALSE(ord.ScanItem("Orange", -.1f));
 }
 
 TEST(OrderTests, ScanItemWeightWrongType) {
@@ -177,7 +177,7 @@ TEST(OrderTests, ScanItemWeightWrongType) {
     db.insertItem({"Chips", Item::Sale_t::Unit, 3});
     Order ord(db);
 
-    ASSERT_FALSE(ord.ScanItem("Chips", 1.0));
+    ASSERT_FALSE(ord.ScanItem("Chips", 1.0f));
 }
 
 // Use Case #2
@@ -186,7 +186,7 @@ TEST(OrderTests, ScanItemWeightAddToCart) {
     db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
     Order ord(db);
 
-    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+    ASSERT_TRUE(ord.ScanItem("Apple", .5f));
     ASSERT_FLOAT_EQ(1.5 * .5, ord.getTotalPrice());
 }
 
@@ -195,8 +195,8 @@ TEST(OrderTests, ScanItemWightAddToCartTwice) {
     db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
     Order ord(db);
 
-    ASSERT_TRUE(ord.ScanItem("Apple", .5));
-    ASSERT_TRUE(ord.ScanItem("Apple", .25));
+    ASSERT_TRUE(ord.ScanItem("Apple", .5f));
+    ASSERT_TRUE(ord.ScanItem("Apple", .25f));
     ASSERT_FLOAT_EQ(1.5 * (.5 + .25), ord.getTotalPrice());;
 }
 
@@ -218,22 +218,25 @@ TEST(OrderTests, ScanItemWeightMarkdown) {
     db.setItemMarkdown("Apple", .25);
     Order ord(db);
 
-    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+    ASSERT_TRUE(ord.ScanItem("Apple", .5f));
     ASSERT_FLOAT_EQ((1.5 - .25) * .5, ord.getTotalPrice());
 }
 
+// Use Case #7
 TEST(OrderTests, RemoveItemUnitNotInOrder) {
     ItemDatabase db;
     Order ord(db);
 
-    ASSERT_FALSE(ord.RemoveItem("Chips", 1));
+    ASSERT_FALSE(ord.RemoveItem("Chips", 1U));
 }
 
 TEST(OrderTests, RemoveItemUnitWrongType) {
     ItemDatabase db;
-    Order ord(db);
     db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
-    ASSERT_FALSE(ord.RemoveItem("Apple", 1));
+    Order ord(db);
+    ASSERT_TRUE(ord.ScanItem("Apple", .5));
+
+    ASSERT_FALSE(ord.RemoveItem("Apple", 1U));
 }
 
 TEST(OrderTests, RemoveItemUnitInvalidQty) {
@@ -242,11 +245,10 @@ TEST(OrderTests, RemoveItemUnitInvalidQty) {
     Order ord(db);
     ASSERT_TRUE(ord.ScanItem("Chips"));
 
-    ASSERT_FALSE(ord.RemoveItem("Chips", 0));
-    ASSERT_FALSE(ord.RemoveItem("Chips", 2));
+    ASSERT_FALSE(ord.RemoveItem("Chips", 0U));
 }
 
-TEST(OrderTests, RemoveItemSuccessfulNoMoreInOrder) {
+TEST(OrderTests, RemoveItemUnitSuccessfulNoMoreInOrder) {
     ItemDatabase db;
     db.insertItem({"Chips", Item::Sale_t::Unit, 3});
     Order ord(db);
@@ -254,11 +256,14 @@ TEST(OrderTests, RemoveItemSuccessfulNoMoreInOrder) {
     ASSERT_TRUE(ord.ScanItem("Chips"));
     ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
 
-    ASSERT_TRUE(ord.RemoveItem("Chips", 1));
+    ASSERT_TRUE(ord.RemoveItem("Chips", 1U));
     ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.RemoveItem("Chips", 2U));
 }
 
-TEST(OrderTests, RemoveItemSuccessfulStillOneRemainingInOrder) {
+TEST(OrderTests, RemoveItemUnitSuccessfulStillOneRemainingInOrder) {
     ItemDatabase db;
     db.insertItem({"Chips", Item::Sale_t::Unit, 3});
     Order ord(db);
@@ -267,6 +272,63 @@ TEST(OrderTests, RemoveItemSuccessfulStillOneRemainingInOrder) {
     ASSERT_TRUE(ord.ScanItem("Chips"));
     ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
 
-    ASSERT_TRUE(ord.RemoveItem("Chips", 1));
+    ASSERT_TRUE(ord.RemoveItem("Chips", 1U));
     ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
 }
+
+TEST(OrderTests, RemoveItemWeightNotInOrder) {
+    ItemDatabase db;
+    Order ord(db);
+
+    ASSERT_FALSE(ord.RemoveItem("Apple", 1.5f));
+}
+
+TEST(OrderTests, RemoveItemWeightWrongType) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    Order ord(db);
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+
+    ASSERT_FALSE(ord.RemoveItem("Chips", 1.0f));
+}
+
+TEST(OrderTests, RemoveItemWeightInvalidWeight) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    Order ord(db);
+    ASSERT_TRUE(ord.ScanItem("Apple", 2.0f));
+
+    ASSERT_FALSE(ord.RemoveItem("Chips", 0.0f));
+    ASSERT_FALSE(ord.RemoveItem("Chips", -0.1f));
+}
+
+TEST(OrderTests, RemoveItemWeightSuccessfulNoMoreInOrder) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", 2.0f));
+    ASSERT_FLOAT_EQ(1.5*2.0, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.RemoveItem("Apple", 2.0f));
+    ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.ScanItem("Apple", 2.0f));
+    ASSERT_TRUE(ord.RemoveItem("Apple", 2.01f));
+    ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+
+}
+
+TEST(OrderTests, RemoveItemWeightSuccessfulStillRemainingInOrder) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", 2.5f));
+    ASSERT_FLOAT_EQ(1.5*2.5, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.RemoveItem("Apple", 1.0f));
+    ASSERT_FLOAT_EQ(1.5*(2.5-1.0), ord.getTotalPrice());
+}
+
+// Remove weight special

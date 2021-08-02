@@ -89,23 +89,63 @@ bool Order::RemoveItem(const std::string& name, unsigned int qty) {
         return false;
     }
 
-    // Quantity must be at least one and not greater than the current quantity in the cart
+    // Quantity must be at least one
     unsigned int curQty = std::get<unsigned int>(cart_it->second);
-    if (qty == 0 || qty > curQty) {
+    if (qty == 0) {
         return false;
     }
 
     // Find current total price of item
-    float prevPrice = getItemTotalPrice(item.value(), mCart[name]);
+    float prevPrice = getItemTotalPrice(item.value(), cart_it->second);
 
     //  Update item quantity and overall cart total
-    if (curQty == qty) {
+    if (qty >= curQty) {
         // Remove item fully from cart
         mCart.erase(cart_it);
         mTotalPrice -= prevPrice;
     } else {
         cart_it->second = (curQty - qty);
-        mTotalPrice -= (prevPrice - getItemTotalPrice(item.value(), cart_it->second));
+        mTotalPrice += getItemTotalPrice(item.value(), cart_it->second) - prevPrice;
+    }
+
+    return true;
+}
+
+bool Order::RemoveItem(const std::string& name, float weight) {
+    // Item must be in order
+    auto cart_it = mCart.find(name);
+    if (cart_it == mCart.end()) {
+        return false;
+    }
+
+    // Grab item info from database
+    auto item = mDatabase.getItem(name);
+    if (!item.has_value()) {
+        return false;
+    }
+
+    // Item must be sold by unit
+    if (Item::Sale_t::Weight != item->getSaleType()) {
+        return false;
+    }
+
+    // Quantity must be at least one and not greater than the current quantity in the cart
+    float curWeight = std::get<float>(cart_it->second);
+    if (weight <= 0) {
+        return false;
+    }
+
+    // Find current total price of item
+    float prevPrice = getItemTotalPrice(item.value(), cart_it->second);
+
+    //  Update item weight and overall cart total
+    if (weight >= curWeight) {
+        // Remove item fully from cart
+        mCart.erase(cart_it);
+        mTotalPrice -= prevPrice;
+    } else {
+        cart_it->second = (curWeight - weight);
+        mTotalPrice += getItemTotalPrice(item.value(), cart_it->second) - prevPrice;
     }
 
     return true;

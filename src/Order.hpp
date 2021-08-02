@@ -16,13 +16,17 @@ public:
     // Return total price of the order
     float getTotalPrice() const;
 
-    // Scans item by unit into cart and updates order total. Item must exist in database and
-    // be sold by unit. Returns status of operation.
+    // Scans item by unit into cart. Item must exist in database and
+    // be sold by unit.  Returns status of operation and updates total price when successful.
     bool ScanItem(const std::string& name);
 
-    // Scans item by weight into cart and updates order total. Item must exist in database and
+    // Scans item by weight into cart. Item must exist in database and
     // be sold by weight. Weight must be > 0. Returns status of operation and updates total price when successful.
     bool ScanItem(const std::string& name, float weight);
+
+    // Removes item from cart by quantity and updates order total. Item must exist in order and
+    // be sold by unit, and quantity must be at least 1.  Returns status of operation and updates total price when successful.
+    bool RemoveItem(const std::string& name, int qty);
 
 private:
     // Get the total price of the item based on amount

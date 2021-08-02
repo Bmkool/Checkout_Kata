@@ -28,9 +28,9 @@ bool Order::ScanItem(const std::string& name) {
     float prevPrice = 0;
     if (mCart.find(name) != mCart.end()) {
         prevPrice = getItemTotalPrice(item.value(), mCart[name]);
-        mCart[name] = ++std::get<int>(mCart[name]);
+        mCart[name] = ++std::get<unsigned int>(mCart[name]);
     } else { // If item isnt already in cart then insert and set the amount to one
-        mCart[name] = 1;
+        mCart[name] = 1U;
     }
 
     // Update overall cart total with updated total price of item.
@@ -71,7 +71,7 @@ bool Order::ScanItem(const std::string& name, float weight) {
     return true;
 }
 
-bool Order::RemoveItem(const std::string& name, int qty) {
+bool Order::RemoveItem(const std::string& name, unsigned int qty) {
     // Item must be in order
     auto cart_it = mCart.find(name);
     if (cart_it == mCart.end()) {
@@ -90,16 +90,30 @@ bool Order::RemoveItem(const std::string& name, int qty) {
     }
 
     // Quantity must be at least one and not greater than the current quantity in the cart
-    if (qty < 1 || qty > std::get<int>(cart_it->second)) {
+    unsigned int curQty = std::get<unsigned int>(cart_it->second);
+    if (qty == 0 || qty > curQty) {
         return false;
+    }
+
+    // Find current total price of item
+    float prevPrice = getItemTotalPrice(item.value(), mCart[name]);
+
+    //  Update item quantity and overall cart total
+    if (curQty == qty) {
+        // Remove item fully from cart
+        mCart.erase(cart_it);
+        mTotalPrice -= prevPrice;
+    } else {
+        cart_it->second = (curQty - qty);
+        mTotalPrice -= (prevPrice - getItemTotalPrice(item.value(), cart_it->second));
     }
 
     return true;
 }
 
-float Order::getItemTotalPrice(const Item& item, const std::variant<int, float>& amt) const {
+float Order::getItemTotalPrice(const Item& item, const std::variant<unsigned int, float>& amt) const {
     if (Item::Sale_t::Unit == item.getSaleType()) {
-        return (item.getPrice() - item.getMarkdown()) * std::get<int>(amt);
+        return (item.getPrice() - item.getMarkdown()) * std::get<unsigned int>(amt);
     } else {
         return (item.getPrice() - item.getMarkdown()) * std::get<float>(amt);
     }

@@ -243,15 +243,30 @@ TEST(OrderTests, RemoveItemUnitInvalidQty) {
     ASSERT_TRUE(ord.ScanItem("Chips"));
 
     ASSERT_FALSE(ord.RemoveItem("Chips", 0));
-    ASSERT_FALSE(ord.RemoveItem("Chips", -1));
     ASSERT_FALSE(ord.RemoveItem("Chips", 2));
 }
 
-TEST(OrderTests, RemoveItemSuccessful) {
+TEST(OrderTests, RemoveItemSuccessfulNoMoreInOrder) {
     ItemDatabase db;
     db.insertItem({"Chips", Item::Sale_t::Unit, 3});
     Order ord(db);
+
     ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
 
     ASSERT_TRUE(ord.RemoveItem("Chips", 1));
+    ASSERT_FLOAT_EQ(0, ord.getTotalPrice());
+}
+
+TEST(OrderTests, RemoveItemSuccessfulStillOneRemainingInOrder) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.RemoveItem("Chips", 1));
+    ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
 }

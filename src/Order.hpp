@@ -26,11 +26,11 @@ public:
 
     // Removes item from cart by quantity and updates order total. Item must exist in order and
     // be sold by unit, and quantity must be at least 1.  Returns status of operation and updates total price when successful.
-    bool RemoveItem(const std::string& name, int qty);
+    bool RemoveItem(const std::string& name, unsigned int qty);
 
 private:
     // Get the total price of the item based on amount
-    float getItemTotalPrice(const Item& item, const std::variant<int, float>& amt) const;
+    float getItemTotalPrice(const Item& item, const std::variant<unsigned int, float>& amt) const;
 
 private:
     // Database of available items
@@ -38,7 +38,7 @@ private:
     // Price of order
     float mTotalPrice;
     // Items that have been scanned into the cart and the corresponding total quantity or weight per item
-    std::unordered_map<std::string, std::variant<int, float>> mCart;
+    std::unordered_map<std::string, std::variant<unsigned int, float>> mCart;
 };
 
 #endif

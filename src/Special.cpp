@@ -3,6 +3,17 @@
 #include <iostream>
 #include <cmath>
 
+void Special::checkArgs(float& amount, float& price) const {
+    if (amount < 0) {
+        std::cerr << "Negative amount entered. Using absolute value" << std::endl;
+        amount = fabs(amount);
+    }
+    if (price < 0) {
+        std::cerr << "Negative price entered. Using absolute value" << std::endl;
+        price = fabs(price);
+    }
+}
+
 BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent) :
     Special(), mNeeded(needed), mReceive(receive)
 {
@@ -15,14 +26,10 @@ BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, fl
 }
 
 float BuyOneGetOneUnit::calcPrice(float numItems, float price) const {
-    if (price < 0) {
-        std::cerr << "Negative price entered. Using absolute value" << std::endl;
-        price = fabs(price);
-    }
-    if (numItems < 0) {
-        std::cerr << "Negative number of items entered. Using absolute value" << std::endl;
-    }
-    unsigned int numItemsInt = static_cast<unsigned int>(fabs(numItems));
+    checkArgs(numItems, price);
+
+    // Convert numItems to int
+    unsigned int numItemsInt = static_cast<unsigned int>(numItems);
 
     // Find how many specials are applicable
     unsigned int specials = numItemsInt / (mNeeded + mReceive);
@@ -51,14 +58,7 @@ BuyOneGetOneWeight::BuyOneGetOneWeight(float needed, float receive, float percen
 }
 
 float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
-    if (price < 0) {
-        std::cerr << "Negative price entered. Using absolute value" << std::endl;
-        price = fabs(price);
-    }
-    if (weight < 0) {
-        std::cerr << "Negative price entered. Using absolute value" << std::endl;
-        weight = fabs(weight);
-    }
+    checkArgs(weight, price);
 
     float total = 0;
     // Loop until no more applicable specials
@@ -73,4 +73,23 @@ float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
     total += weight * price;
 
     return total;
+}
+
+NforX::NforX(unsigned int needed, float disc_price) :
+    Special(), mNeeded(needed), mDiscPrice(disc_price)
+{}
+
+float NforX::calcPrice(float numItems, float price) const {
+    checkArgs(numItems, price);
+
+    // Convert numItems to int
+    unsigned int numItemsInt = static_cast<unsigned int>(numItems);
+
+    // Find how many specials are applicable
+    unsigned int specials = numItemsInt / mNeeded;
+
+    // Retrieve leftover items
+    numItemsInt %= mNeeded;
+
+    return  specials * mNeeded * mDiscPrice +  numItemsInt * price;
 }

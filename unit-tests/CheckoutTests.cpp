@@ -2,10 +2,10 @@
 #include <optional>
 #include <cmath>
 
-#include "Item.hpp"
-#include "ItemDatabase.hpp"
-#include "Order.hpp"
-#include "Special.hpp"
+#include "../src/Item.hpp"
+#include "../src/ItemDatabase.hpp"
+#include "../src/Order.hpp"
+#include "../src/Special.hpp"
 
 TEST(ItemTests, GetItemName) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
@@ -445,28 +445,15 @@ TEST(SpecialTests, BuyOneGetOneXPercentUnitAddedAmount) {
     delete sp;
 }
 
-TEST(SpecialTests, BuyOneGetOneFreeWeightInvalidPercentPrice) {
+TEST(SpecialTests, BuyOneGetOneFreeWeightInvalidPrice) {
     float weightNeeded = 1.5;
     float weightReceived = .5;
-    float percentOff = 101; // Over 100%
+    float percentOff = 100;
     float weightItems = 2;
-    float price = 1;
+    float price = -1.5;
 
     Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
     float total = sp->calcPrice(weightItems, price);
-    ASSERT_FLOAT_EQ(weightItems * price, total);
-    delete sp;
-
-    percentOff = -10; // Negative percent
-    sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
-    total = sp->calcPrice(weightItems, price);
-    ASSERT_FLOAT_EQ(weightItems * price, total);
-    delete sp;
-
-    price = -1.5;  // Negative price
-    percentOff = 100;
-    sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
-    total = sp->calcPrice(weightItems, price);
     ASSERT_FLOAT_EQ((weightItems - weightReceived) * fabs(price), total);
     delete sp;
 }
@@ -566,5 +553,53 @@ TEST(SpecialTests, BuyOneGetOneXPercentWeightTwoSpecialsLesserAmount) {
     float total = sp->calcPrice(weightItems, price);
     // One special received
     ASSERT_FLOAT_EQ((weightNeeded * 2 * price) + (weightReceived * 1.5 * price * (1-percentOff/100)), total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXNotEnough) {
+    unsigned int numNeeded = 3;
+    float basePrice = 5.5;
+    unsigned int numItems = 2;
+    float discPrice = 5;
+
+    Special *sp = new NforX(numNeeded, discPrice);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numItems * basePrice, total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXExact) {
+    unsigned int numNeeded = 3;
+    float basePrice = 5.5;
+    unsigned int numItems = 3;
+    float discPrice = 5;
+
+    Special *sp = new NforX(numNeeded, discPrice);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numItems * discPrice, total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXExtra) {
+    unsigned int numNeeded = 3;
+    float basePrice = 5.5;
+    unsigned int numItems = 4;
+    float discPrice = 5;
+
+    Special *sp = new NforX(numNeeded, discPrice);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numNeeded * discPrice + (numItems - numNeeded) * basePrice, total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXMultipleAndExtra) {
+    unsigned int numNeeded = 3;
+    float basePrice = 5.5;
+    unsigned int numItems = numNeeded * 2 + 1;
+    float discPrice = 5;
+
+    Special *sp = new NforX(numNeeded, discPrice);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numNeeded * 2 * discPrice + (numItems - numNeeded * 2) * basePrice, total);
     delete sp;
 }

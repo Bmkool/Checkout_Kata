@@ -214,7 +214,7 @@ TEST(DatabaseTests, SetItemSpecialNforXSuccess) {
 
     // Not in database
     ASSERT_TRUE(db.insertItem(chip));
-    ASSERT_TRUE(db.setItemSpecial("Chips", 3U, 2.5f));
+    ASSERT_TRUE(db.setItemSpecial("Chips", 3U, 5.0f));
 
     // Special exists
     ASSERT_NE(nullptr, db.getItem("Chips")->getSpecial());
@@ -710,7 +710,7 @@ TEST(SpecialTests, NforXNotEnough) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
     unsigned int numItems = 2;
-    float discPrice = 5;
+    float discPrice = 10;
 
     Special *sp = new NforX(numNeeded, discPrice);
     float total = sp->calcPrice(numItems, basePrice);
@@ -722,11 +722,11 @@ TEST(SpecialTests, NforXExact) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
     unsigned int numItems = 3;
-    float discPrice = 5;
+    float discPrice = 10;
 
     Special *sp = new NforX(numNeeded, discPrice);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numItems * discPrice, total);
+    ASSERT_FLOAT_EQ(discPrice, total);
     delete sp;
 }
 
@@ -734,11 +734,11 @@ TEST(SpecialTests, NforXExtra) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
     unsigned int numItems = 4;
-    float discPrice = 5;
+    float discPrice = 10;
 
     Special *sp = new NforX(numNeeded, discPrice);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numNeeded * discPrice + (numItems - numNeeded) * basePrice, total);
+    ASSERT_FLOAT_EQ(discPrice + (numItems - numNeeded) * basePrice, total);
     delete sp;
 }
 
@@ -746,11 +746,11 @@ TEST(SpecialTests, NforXMultipleAndExtra) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
     unsigned int numItems = numNeeded * 2 + 1;
-    float discPrice = 5;
+    float discPrice = 10;
 
     Special *sp = new NforX(numNeeded, discPrice);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numNeeded * 2 * discPrice + (numItems - numNeeded * 2) * basePrice, total);
+    ASSERT_FLOAT_EQ(2 * discPrice + (numItems - numNeeded * 2) * basePrice, total);
     delete sp;
 }
 
@@ -857,7 +857,7 @@ TEST(SpecialTests, NforXLimitUnderSpecial) {
     unsigned int numNeeded = 3;
     float basePrice = 10.4;
     unsigned int numItems = 3;
-    float discPrice = 6.79;
+    float discPrice = 20;
     unsigned int limit = 2;
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
@@ -870,12 +870,12 @@ TEST(SpecialTests, NforXLimitEqual) {
     unsigned int numNeeded = 3;
     float basePrice = 10.4;
     unsigned int numItems = 6;
-    float discPrice = 6.79;
+    float discPrice = 20;
     unsigned int limit = 6;
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numItems * discPrice, total); // Two specials
+    ASSERT_FLOAT_EQ(discPrice * 2, total); // Two specials
     delete sp;
 }
 
@@ -883,11 +883,11 @@ TEST(SpecialTests, NforXLimitExceeded) {
     unsigned int numNeeded = 3;
     float basePrice = 10.4;
     unsigned int numItems = 7;
-    float discPrice = 6.79;
+    float discPrice = 20;
     unsigned int limit = 3;
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ((numItems - limit) * basePrice + numNeeded * discPrice, total); // One special
+    ASSERT_FLOAT_EQ((numItems - limit) * basePrice + discPrice, total); // One special
     delete sp;
 }

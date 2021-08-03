@@ -111,5 +111,5 @@ float NforX::calcPrice(float numItems, float price) const {
     // Retrieve leftover items
     numItemsInt %= mNeeded;
 
-    return  specials * mNeeded * mDiscPrice + (numItemsInt + overLimit) * price;
+    return  specials * mDiscPrice + (numItemsInt + overLimit) * price;
 }

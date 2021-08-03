@@ -53,8 +53,8 @@ float BuyOneGetOneUnit::calcPrice(float numItems, float price) const {
     return total;
 }
 
-BuyOneGetOneWeight::BuyOneGetOneWeight(float needed, float receive, float percent) :
-     mNeeded(fabs(needed)), mReceive(fabs(receive))
+BuyOneGetOneWeight::BuyOneGetOneWeight(float needed, float receive, float percent, float limit) :
+     mNeeded(fabs(needed)), mReceive(fabs(receive)), mLimit(fabs(limit))
 {
     if (percent < 0 || percent > 100) {
         std::cerr << "Invalid percentage. Must be between 0 and 100. Setting to 0" << std::endl;
@@ -67,6 +67,13 @@ BuyOneGetOneWeight::BuyOneGetOneWeight(float needed, float receive, float percen
 float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
     checkArgs(weight, price);
 
+    // Determine how much weight it overlimit and remove from special calculation
+    unsigned int overLimit = 0;
+    if (mLimit > 0) {
+        overLimit = weight - mLimit;
+        weight -= overLimit;
+    }
+
     float total = 0;
     // Loop until no more applicable specials
     while (weight > mNeeded) {
@@ -77,7 +84,7 @@ float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
     }
 
     // Add leftover weight to total
-    total += weight * price;
+    total += (weight + overLimit) * price;
 
     return total;
 }

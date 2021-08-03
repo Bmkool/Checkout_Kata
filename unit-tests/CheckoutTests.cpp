@@ -647,3 +647,59 @@ TEST(SpecialTests, BuyOneGetOneFreeUnitLimitExceeded) {
     ASSERT_FLOAT_EQ((numItems-numReceived) * price, total); // Onle 1 discount allowed as limit reached
     delete sp;
 }
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLimitUnderSpecial) {
+    float weightNeeded = 2.5;
+    float weightReceived = 1.5;
+    float percentOff = 100;
+    float weightItems = 4;
+    float price = 8.75;
+    float limit = 1.5;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
+    float total = sp->calcPrice(weightItems, price); // Illogical, but since limit is 1.5 no weight meet special qualifier so all base price
+    ASSERT_FLOAT_EQ(weightItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLimitEqual) {
+    float weightNeeded = 2.5;
+    float weightReceived = 1.5;
+    float percentOff = 100;
+    float weightItems = 8;
+    float price = 8.75;
+    float limit = 8;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
+    float total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ((weightItems-(weightReceived*2)) * price, total); // 2 free pounds reach limit
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLimitExceeded) {
+    float weightNeeded = 2.5;
+    float weightReceived = 1.5;
+    float percentOff = 100;
+    float weightItems = 8;
+    float price = 8.75;
+    float limit = 4;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
+    float total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ((weightItems-weightReceived) * price, total); // Onle 1 discount allowed as limit reached
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLimitBetweenNeededAndReceived) {
+    float weightNeeded = 2.5;
+    float weightReceived = 1.5;
+    float percentOff = 100;
+    float weightItems = 8;
+    float price = 8.75;
+    float limit = 3;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
+    float total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ((weightItems-(limit-weightNeeded)) * price, total); // Onle partial discount allowed as limit reached
+    delete sp;
+}

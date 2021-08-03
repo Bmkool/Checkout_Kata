@@ -34,14 +34,14 @@ class BuyOneGetOneWeight : public Special {
 public:
     // Constructor. PercentOff must be between [0, 100] else a default of 0% off is used.
     // If needed or receive are negative the absolute value will be used.
-    BuyOneGetOneWeight(float needed, float receive, float percent);
+    BuyOneGetOneWeight(float needed, float receive, float percent, float mLimit = 0);
     float calcPrice(float numItems, float price) const override;
 
 private:
     float mNeeded;   // Weight of items needed to receive the special
     float mReceive;  // How much weight to receive the discount
     float mPercentOff;  // Percentage off of base price (as decimal [0,1])
-    // float mLimit; // Limit on number of items available per special. 0 = no limit
+    float mLimit; // Limit on number of items available per special. 0 = no limit
 };
 
 class NforX : public Special {

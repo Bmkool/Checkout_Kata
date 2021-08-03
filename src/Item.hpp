@@ -13,7 +13,7 @@ public:
     enum class Sale_t { Unit, Weight };
 
     // Constructor. Price should be positive, if not the absolute value will be used.
-    Item(std::string name, Sale_t type, float price);
+    Item(const std::string& name, Sale_t type, float price);
 
     // Return name of item
     const std::string& getName() const;
@@ -34,7 +34,7 @@ public:
     bool setMarkdown(float newMarkdown);
 
     // Set new special or nullptr to remove. Returns success of operation
-    void setSpecial(std::shared_ptr<Special> special);
+    void setSpecial(const std::shared_ptr<Special>& special);
 
     // Returns raw pointer to current special or nullptr if none
     const Special* getSpecial() const;

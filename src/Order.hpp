@@ -11,7 +11,7 @@ class Order
 {
 public:
     // Constructor. All items that can be added to the order must be in the ItemDatabase
-    Order(const ItemDatabase& db);
+    explicit Order(const ItemDatabase& db);
 
     // Return total price of the order
     float getTotalPrice() const;

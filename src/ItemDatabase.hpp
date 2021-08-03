@@ -10,7 +10,7 @@
 class ItemDatabase {
 public:
     // Default constructor
-    ItemDatabase() {};
+    ItemDatabase() {}
 
     // Returns copy of item information in the database if it exists
     std::optional<Item> getItem(const std::string& name) const;

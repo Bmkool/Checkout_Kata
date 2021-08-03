@@ -336,10 +336,10 @@ TEST(OrderTests, RemoveItemWeightSuccessfulStillRemainingInOrder) {
 // Remove weight special
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercentPrice) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 101; // Over 100%
-    int numItems = 3;
+    unsigned int numItems = 3;
     float price = 1;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
@@ -361,11 +361,12 @@ TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercentPrice) {
     delete sp;
 }
 
+// Use case 4
 TEST(SpecialTests, BuyOneGetOneFreeUnitNotEnough) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 100;
-    int numItems = 2;
+    unsigned int numItems = 2;
     float price = 1.5;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
@@ -375,57 +376,195 @@ TEST(SpecialTests, BuyOneGetOneFreeUnitNotEnough) {
 }
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitExactAmount) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 100;
-    int numItems = 3;
+    unsigned int numItems = 3;
     float price = 1.5;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
     float total = sp->calcPrice(numItems, price);
     // One special received
-    ASSERT_FLOAT_EQ((numItems - 1) * price, total);
+    ASSERT_FLOAT_EQ((numItems - numReceived) * price, total);
     delete sp;
 }
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitExtraAmount) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 100;
-    int numItems = 4;
+    unsigned int numItems = 4;
     float price = 1.5;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
     float total = sp->calcPrice(numItems, price);
     // One special received
-    ASSERT_FLOAT_EQ((numItems - 1) * price, total);
+    ASSERT_FLOAT_EQ((numItems - numReceived) * price, total);
     delete sp;
 }
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitExtraAmountMultipleSpecials) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 100;
-    int numItems = 7;
+    unsigned int numItems = 7;
     float price = 1.5;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
     float total = sp->calcPrice(numItems, price);
     // Two specials received
-    ASSERT_FLOAT_EQ((numItems - 2) * price, total);
+    ASSERT_FLOAT_EQ((numItems - 2*numReceived) * price, total);
     delete sp;
 }
 
 TEST(SpecialTests, BuyOneGetOneXPercentUnitExactAmount) {
-    int numNeeded = 2;
-    int numReceived = 1;
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
     float percentOff = 25;
-    int numItems = 3;
+    unsigned int numItems = 3;
     float price = 1.5;
 
     Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
     float total = sp->calcPrice(numItems, price);
     // One special received
-    ASSERT_FLOAT_EQ(((numItems - 1) * price) + (price * (1 - percentOff/100)), total);
+    ASSERT_FLOAT_EQ(((numItems - numReceived) * price) + (price * (1 - percentOff/100)), total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneXPercentUnitAddedAmount) {
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
+    float percentOff = 25;
+    unsigned int numItems = 4;
+    float price = 1.5;
+
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff);
+    float total = sp->calcPrice(numItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ(((numItems - numReceived) * price) + (price * (1 - percentOff/100)), total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightInvalidPercentPrice) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 101; // Over 100%
+    float weightItems = 2;
+    float price = 1;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ(weightItems * price, total);
+    delete sp;
+
+    percentOff = -10; // Negative percent
+    sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ(weightItems * price, total);
+    delete sp;
+
+    price = -1.5;  // Negative price
+    percentOff = 100;
+    sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ((weightItems - weightReceived) * fabs(price), total);
+    delete sp;
+}
+
+// Use case 8
+TEST(SpecialTests, BuyOneGetOneFreeWeightNotEnough) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 100;
+    float weightItems = 1;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    ASSERT_FLOAT_EQ(weightItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightExactAmount) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 100;
+    float weightItems = weightNeeded + weightReceived;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((weightItems - weightReceived) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLesserAmount) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 100;
+    float weightItems = weightNeeded + weightReceived/2;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // Part of special received
+    ASSERT_FLOAT_EQ((weightItems - weightReceived/2) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightExtraAmount) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 100;
+    float weightItems = 2.5;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((weightItems - weightReceived) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightExtraAmountMultipleSpecials) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 100;
+    float weightItems = weightNeeded * 2 + weightReceived * 1.5;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // One special and part received
+    ASSERT_FLOAT_EQ((weightItems - (weightReceived*1.5)) * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneXPercentWeightExactAmount) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 25;
+    float weightItems = 2;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((weightNeeded * price) + (weightReceived * price * (1-percentOff/100)), total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneXPercentWeightTwoSpecialsLesserAmount) {
+    float weightNeeded = 1.5;
+    float weightReceived = .5;
+    float percentOff = 25;
+    float weightItems = weightNeeded * 2 + weightReceived * 1.5;
+    float price = 3.49;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff);
+    float total = sp->calcPrice(weightItems, price);
+    // One special received
+    ASSERT_FLOAT_EQ((weightNeeded * 2 * price) + (weightReceived * 1.5 * price * (1-percentOff/100)), total);
     delete sp;
 }

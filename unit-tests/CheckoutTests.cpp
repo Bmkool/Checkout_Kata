@@ -769,6 +769,20 @@ TEST(SpecialTests, BuyOneGetOneFreeUnitLimitUnderSpecial) {
     delete sp;
 }
 
+TEST(SpecialTests, BuyOneGetOneFreeUnitLimitSpecialNotReached) {
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
+    float percentOff = 100;
+    unsigned int numItems = 1;
+    float price = 1.5;
+    unsigned int limit = 6;
+
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff, limit);
+    float total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ(numItems * price, total);
+    delete sp;
+}
+
 TEST(SpecialTests, BuyOneGetOneFreeUnitLimitEqual) {
     unsigned int numNeeded = 2;
     unsigned int numReceived = 1;
@@ -807,6 +821,20 @@ TEST(SpecialTests, BuyOneGetOneFreeWeightLimitUnderSpecial) {
 
     Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
     float total = sp->calcPrice(weightItems, price); // Illogical, but since limit is 1.5 no weight meet special qualifier so all base price
+    ASSERT_FLOAT_EQ(weightItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeWeightLimitSpecialNotReached) {
+    float weightNeeded = 2.5;
+    float weightReceived = 1.5;
+    float percentOff = 100;
+    float weightItems = 2.0;
+    float price = 8.75;
+    float limit = 8;
+
+    Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
+    float total = sp->calcPrice(weightItems, price);
     ASSERT_FLOAT_EQ(weightItems * price, total);
     delete sp;
 }
@@ -866,6 +894,19 @@ TEST(SpecialTests, NforXLimitUnderSpecial) {
     delete sp;
 }
 
+TEST(SpecialTests, NforXLimitSpecialNotReached) {
+    unsigned int numNeeded = 3;
+    float basePrice = 10.4;
+    unsigned int numItems = 2;
+    float discPrice = 20;
+    unsigned int limit = 6;
+
+    Special *sp = new NforX(numNeeded, discPrice, limit);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(basePrice * numItems, total); // Two specials
+    delete sp;
+}
+
 TEST(SpecialTests, NforXLimitEqual) {
     unsigned int numNeeded = 3;
     float basePrice = 10.4;
@@ -890,4 +931,94 @@ TEST(SpecialTests, NforXLimitExceeded) {
     float total = sp->calcPrice(numItems, basePrice);
     ASSERT_FLOAT_EQ((numItems - limit) * basePrice + discPrice, total); // One special
     delete sp;
+}
+
+
+// Integration test with shopping cart consisting of multiple items, specials, etc
+TEST(IntegrationTest, FullShoppingCartLargeOrder) {
+    // Setup Database and specials
+    ItemDatabase db;
+    for (const auto& item : { Item{"Eggs", Item::Sale_t::Unit, 1.29},
+                              Item{"Bread", Item::Sale_t::Unit, 2.99},
+                              Item{"Cereal", Item::Sale_t::Unit, 2.50},
+                              Item{"Soda", Item::Sale_t::Unit, 4.99},
+                              Item{"Oranges", Item::Sale_t::Weight, 1.99},
+                              Item{"Steak", Item::Sale_t::Weight, 12.99},
+                              Item{"Turkey", Item::Sale_t::Weight, 9.49}, })
+    {
+        db.insertItem(item);
+    }
+
+
+    ASSERT_TRUE(db.setItemMarkdown("Bread", .49));              // Bread 49 cents off
+    ASSERT_TRUE(db.setItemSpecial("Cereal", 1U, 1U, 100));      // Cereal BOGO free
+    ASSERT_TRUE(db.setItemSpecial("Soda", 3U, 12.00f, 3U));      // Soda 3 for $12 limit three sodas (1 special)
+    ASSERT_TRUE(db.setItemSpecial("Steak", 1.0f, 0.5f, 25));    // Steak Buy 1 lb get .5 lb 25% off
+    ASSERT_TRUE(db.setItemMarkdown("Turkey", 1.49));
+    ASSERT_TRUE(db.setItemSpecial("Turkey", 1.0f, 1.0f, 50, 4.0f));    // Turkey markdown 1.49, BOGO 50% 1lb limit of 4 lbs
+
+    // Start order
+    float exp_subtotal = 0; // Expected total of cart
+    Order o(db);
+
+    auto check_total = [&] (float diff) { exp_subtotal += diff; EXPECT_EQ(exp_subtotal, o.getTotalPrice());}; // Update and check order total
+
+    // Eggs
+    EXPECT_TRUE(o.ScanItem("Eggs"));
+    check_total(1.29);  // Add egg
+    EXPECT_TRUE(o.ScanItem("Eggs"));
+    check_total(1.29);  // Add egg
+
+    // Bread
+    EXPECT_TRUE(o.ScanItem("Bread"));
+    check_total(2.99 - .49);    // Add markdown price of bread
+
+    // Remove one of eggs dont want anymore
+    EXPECT_TRUE(o.RemoveItem("Eggs", 1U));
+    check_total(-1.29);
+
+    // Cereal 1
+    EXPECT_TRUE(o.ScanItem("Cereal"));
+    check_total(2.50);    // Add single cereal
+
+    // Soda
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(4.99);    // Add Soda single
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(4.99);
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(12 - (4.99*2));    // Add Soda special
+
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(4.99);
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(4.99);
+    EXPECT_TRUE(o.ScanItem("Soda"));
+    check_total(4.99);     // Limit hit no special
+
+    // Cereal 2
+    EXPECT_TRUE(o.ScanItem("Cereal")); // Finish BOGO deal
+    check_total(0);
+
+    // Oranges
+    EXPECT_TRUE(o.ScanItem("Oranges", 1.25));
+    check_total(1.99 * 1.25);
+
+    // Steak
+    EXPECT_TRUE(o.ScanItem("Steak", 2.75));
+    check_total(12.99 * 2.0 + 12.99 * (.5 + .25) * (1-.25)); // 2 lbs normal, .75 of deal (25 % off)
+
+    // Turkey
+    EXPECT_TRUE(o.ScanItem("Turkey", 5.5));
+    float md_price = 9.49 - 1.49;
+    float tmp_turkeyprice = (md_price * 2.0) + md_price * .5 * 2.0 + md_price * 1.5; // 3.5lbs total md_price, 2 lbs of 50% off
+    check_total(tmp_turkeyprice);
+
+    // Remove Turkey accidentally weighed too much
+    EXPECT_TRUE(o.RemoveItem("Turkey", 3.0f));
+    float new_turkeyprice = (md_price * 1.5) +  md_price * .5 * 1.0; // 1.5 lbs of base price, 1.0 lb special price
+    check_total(new_turkeyprice - tmp_turkeyprice);
+
+    // Fun sanity printout of final order total
+    printf("Order Total = $%.2f\n", o.getTotalPrice());
 }

@@ -52,7 +52,7 @@ public:
 
 private:
     unsigned int mNeeded; // Number of items needed to receive the special
-    float mDiscPrice;    // Price of special items
+    float mDiscPrice;    // Overall price for mNeeded items
     unsigned int mLimit; // Limit on number of items available per special. 0 = no limit
 };
 

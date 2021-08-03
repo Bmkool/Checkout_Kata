@@ -33,7 +33,7 @@ float BuyOneGetOneUnit::calcPrice(float numItems, float price) const {
 
     // Determine how many are overlimit and remove those from special calculation
     unsigned int overLimit = 0;
-    if (mLimit > 0) {
+    if (mLimit > 0 && numItemsInt > mLimit) {
         overLimit = numItemsInt - mLimit;
         numItemsInt -= overLimit;
     }
@@ -69,7 +69,7 @@ float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
 
     // Determine how much weight it overlimit and remove from special calculation
     unsigned int overLimit = 0;
-    if (mLimit > 0) {
+    if (mLimit > 0 && weight > mLimit) {
         overLimit = weight - mLimit;
         weight -= overLimit;
     }
@@ -101,7 +101,7 @@ float NforX::calcPrice(float numItems, float price) const {
 
     // Determine how many are overlimit and remove those from special calculation
     unsigned int overLimit = 0;
-    if (mLimit > 0) {
+    if (mLimit > 0 && numItemsInt > mLimit) {
         overLimit = numItemsInt - mLimit;
         numItemsInt -= overLimit;
     }

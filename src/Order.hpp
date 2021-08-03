@@ -35,7 +35,7 @@ public:
     bool RemoveItem(const std::string& name, float weight);
 
 private:
-    // Get the total price of the item based on amount
+    // Get the total price of the item based on amount and account for specials
     float getItemTotalPrice(const Item& item, const std::variant<unsigned int, float>& amt) const;
 
 private:

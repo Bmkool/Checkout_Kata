@@ -256,6 +256,18 @@ TEST(OrderTests, ScanItemUnitAddToCartTwice) {
     ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
 }
 
+TEST(OrderTests, ScanItemUnitAddToCartSpecial) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    db.setItemSpecial("Chips", 2U, 1U, 100);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
+}
+
 TEST(OrderTests, ScanItemWeightNotInDatabase) {
     ItemDatabase db;
     Order ord(db);
@@ -300,6 +312,16 @@ TEST(OrderTests, ScanItemWightAddToCartTwice) {
     ASSERT_TRUE(ord.ScanItem("Apple", .5f));
     ASSERT_TRUE(ord.ScanItem("Apple", .25f));
     ASSERT_FLOAT_EQ(1.5 * (.5 + .25), ord.getTotalPrice());;
+}
+
+TEST(OrderTests, ScanItemWightAddToCartSpecial) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    db.setItemSpecial("Apple", .5f, .25f, 100);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", .75f));
+    ASSERT_FLOAT_EQ(1.5 * .5, ord.getTotalPrice());
 }
 
 // Use Case #3a
@@ -378,6 +400,21 @@ TEST(OrderTests, RemoveItemUnitSuccessfulStillOneRemainingInOrder) {
     ASSERT_FLOAT_EQ(3, ord.getTotalPrice());
 }
 
+TEST(OrderTests, AddItemSpecialRemoveItemInvalidateSpecialUnit) {
+    ItemDatabase db;
+    db.insertItem({"Chips", Item::Sale_t::Unit, 3});
+    db.setItemSpecial("Chips", 2U, 1U, 100);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_TRUE(ord.ScanItem("Chips"));
+    ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice()); // BOGO special reached
+
+    ASSERT_TRUE(ord.RemoveItem("Chips", 1U)); // No more BOGO
+    ASSERT_FLOAT_EQ(3*2, ord.getTotalPrice());
+}
+
 TEST(OrderTests, RemoveItemWeightNotInOrder) {
     ItemDatabase db;
     Order ord(db);
@@ -433,7 +470,19 @@ TEST(OrderTests, RemoveItemWeightSuccessfulStillRemainingInOrder) {
     ASSERT_FLOAT_EQ(1.5*(2.5-1.0), ord.getTotalPrice());
 }
 
-// Remove weight special
+TEST(OrderTests, AddItemSpecialRemoveItemInvalidateSpecialWeight) {
+    ItemDatabase db;
+    db.insertItem({"Apple", Item::Sale_t::Weight, 1.5});
+    db.setItemSpecial("Apple", .5f, .25f, 100);
+    Order ord(db);
+
+    ASSERT_TRUE(ord.ScanItem("Apple", .75f));
+    ASSERT_FLOAT_EQ(1.5 * .5, ord.getTotalPrice());
+
+    ASSERT_TRUE(ord.RemoveItem("Apple", .3f));
+    ASSERT_FLOAT_EQ(1.5 * (.75 - .3), ord.getTotalPrice());
+}
+
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercentPrice) {
     unsigned int numNeeded = 2;
@@ -461,7 +510,7 @@ TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercentPrice) {
     delete sp;
 }
 
-// Use case 4
+// Use case #4
 TEST(SpecialTests, BuyOneGetOneFreeUnitNotEnough) {
     unsigned int numNeeded = 2;
     unsigned int numReceived = 1;
@@ -558,7 +607,7 @@ TEST(SpecialTests, BuyOneGetOneFreeWeightInvalidPrice) {
     delete sp;
 }
 
-// Use case 8
+// Use case #8
 TEST(SpecialTests, BuyOneGetOneFreeWeightNotEnough) {
     float weightNeeded = 1.5;
     float weightReceived = .5;
@@ -656,7 +705,7 @@ TEST(SpecialTests, BuyOneGetOneXPercentWeightTwoSpecialsLesserAmount) {
     delete sp;
 }
 
-// Use case 5
+// Use case #5
 TEST(SpecialTests, NforXNotEnough) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
@@ -705,7 +754,7 @@ TEST(SpecialTests, NforXMultipleAndExtra) {
     delete sp;
 }
 
-// Use case 6
+// Use case #6
 TEST(SpecialTests, BuyOneGetOneFreeUnitLimitUnderSpecial) {
     unsigned int numNeeded = 2;
     unsigned int numReceived = 1;

@@ -164,10 +164,13 @@ bool Order::RemoveItem(const std::string& name, float weight) {
 }
 
 float Order::getItemTotalPrice(const Item& item, const std::variant<unsigned int, float>& amt) const {
-    if (Item::Sale_t::Unit == item.getSaleType()) {
-        return (item.getPrice() - item.getMarkdown()) * std::get<unsigned int>(amt);
+    auto spec = item.getSpecial();
+    float amount = (Item::Sale_t::Unit == item.getSaleType()) ? std::get<unsigned int>(amt) : std::get<float>(amt);
+    // Use special if available otherwise calculate manually
+    if (spec) {
+        return spec->calcPrice(amount, item.getPrice() - item.getMarkdown());
     } else {
-        return (item.getPrice() - item.getMarkdown()) * std::get<float>(amt);
+        return (item.getPrice() - item.getMarkdown()) * amount;
     }
 }
 

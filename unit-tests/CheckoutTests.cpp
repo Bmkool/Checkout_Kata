@@ -57,6 +57,19 @@ TEST(ItemTests, ValidMarkdown) {
     ASSERT_EQ(3, chip.getPrice());
 }
 
+TEST(ItemTests, SetGetSpecial) {
+    // Negative price gets set to absolute value
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ASSERT_EQ(nullptr, chip.getSpecial());
+
+    auto sp = std::make_shared<BuyOneGetOneUnit>(5, 2, 100);
+    chip.setSpecial(sp);
+    ASSERT_EQ(sp.get(), chip.getSpecial());
+
+    chip.setSpecial(nullptr);
+    ASSERT_EQ(nullptr, chip.getSpecial());
+}
+
 TEST(DatabaseTests, InsertIntoDatabase) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ItemDatabase db;
@@ -700,7 +713,7 @@ TEST(SpecialTests, BuyOneGetOneFreeWeightLimitBetweenNeededAndReceived) {
 
     Special *sp = new BuyOneGetOneWeight(weightNeeded, weightReceived, percentOff, limit);
     float total = sp->calcPrice(weightItems, price);
-    ASSERT_FLOAT_EQ((weightItems-(limit-weightNeeded)) * price, total); // Onle partial discount allowed as limit reached
+    ASSERT_FLOAT_EQ((weightItems-(limit-weightNeeded)) * price, total); // Only partial discount allowed as limit reached
     delete sp;
 }
 
@@ -713,7 +726,7 @@ TEST(SpecialTests, NforXLimitUnderSpecial) {
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numItems * basePrice, total);
+    ASSERT_FLOAT_EQ(numItems * basePrice, total); // Illogical, no special
     delete sp;
 }
 
@@ -726,7 +739,7 @@ TEST(SpecialTests, NforXLimitEqual) {
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ(numItems * discPrice, total);
+    ASSERT_FLOAT_EQ(numItems * discPrice, total); // Two specials
     delete sp;
 }
 
@@ -739,6 +752,6 @@ TEST(SpecialTests, NforXLimitExceeded) {
 
     Special *sp = new NforX(numNeeded, discPrice, limit);
     float total = sp->calcPrice(numItems, basePrice);
-    ASSERT_FLOAT_EQ((numItems - limit) * basePrice + numNeeded * discPrice, total);
+    ASSERT_FLOAT_EQ((numItems - limit) * basePrice + numNeeded * discPrice, total); // One special
     delete sp;
 }

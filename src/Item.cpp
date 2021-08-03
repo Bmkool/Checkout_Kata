@@ -1,10 +1,11 @@
 #include "Item.hpp"
+#include "Special.hpp"
 
 #include <cmath>
 #include <iostream>
 
 Item::Item(std::string name, Sale_t type, float price) :
-    mName(name), mType(type), mPrice(fabs(price)), mMarkdown(0)
+    mName(name), mType(type), mPrice(fabs(price)), mMarkdown(0), mSpecial(nullptr)
 {}
 
 const std::string& Item::getName() const {
@@ -41,4 +42,15 @@ bool Item::setMarkdown(float newMarkdown) {
 
     mMarkdown = newMarkdown;
     return true;
+}
+
+void Item::setSpecial(std::shared_ptr<Special> special) {
+    if (!special) {
+        mSpecial.reset(); // If nullptr then remove special
+    }
+    mSpecial = special;
+}
+
+const Special* Item::getSpecial() const {
+    return mSpecial.get();
 }

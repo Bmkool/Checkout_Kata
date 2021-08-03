@@ -14,8 +14,8 @@ void Special::checkArgs(float& amount, float& price) const {
     }
 }
 
-BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent) :
-    Special(), mNeeded(needed), mReceive(receive)
+BuyOneGetOneUnit::BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent, unsigned int limit) :
+     mNeeded(needed), mReceive(receive), mLimit(limit)
 {
     if (percent < 0 || percent > 100) {
         std::cerr << "Invalid percentage. Must be between 0 and 100. Setting to 0" << std::endl;
@@ -31,6 +31,13 @@ float BuyOneGetOneUnit::calcPrice(float numItems, float price) const {
     // Convert numItems to int
     unsigned int numItemsInt = static_cast<unsigned int>(numItems);
 
+    // Determine how many are overlimit and remove those from special calculation
+    unsigned int overLimit = 0;
+    if (mLimit > 0) {
+        overLimit = numItemsInt - mLimit;
+        numItemsInt -= overLimit;
+    }
+
     // Find how many specials are applicable
     unsigned int specials = numItemsInt / (mNeeded + mReceive);
 
@@ -40,14 +47,14 @@ float BuyOneGetOneUnit::calcPrice(float numItems, float price) const {
     // Apply deal to number of applicable specials
     float total = specials * ((mNeeded * price) + mReceive * (price * (1 - mPercentOff)));
 
-    // Add leftover items to total
-    total += numItemsInt * price;
+    // Add leftover and overlimit items to total
+    total += (numItemsInt + overLimit) * price;
 
     return total;
 }
 
 BuyOneGetOneWeight::BuyOneGetOneWeight(float needed, float receive, float percent) :
-    Special(), mNeeded(fabs(needed)), mReceive(fabs(receive))
+     mNeeded(fabs(needed)), mReceive(fabs(receive))
 {
     if (percent < 0 || percent > 100) {
         std::cerr << "Invalid percentage. Must be between 0 and 100. Setting to 0" << std::endl;
@@ -76,7 +83,7 @@ float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
 }
 
 NforX::NforX(unsigned int needed, float disc_price) :
-    Special(), mNeeded(needed), mDiscPrice(disc_price)
+     mNeeded(needed), mDiscPrice(disc_price)
 {}
 
 float NforX::calcPrice(float numItems, float price) const {

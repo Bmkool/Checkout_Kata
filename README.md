@@ -8,5 +8,4 @@ Run: `cmake -B build -S . && make -C build`
 
 # Running
 
-Main Program: `./build/checkout`\
 Unit Tests: `./build/checkout_tests`

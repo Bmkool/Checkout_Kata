@@ -4,7 +4,6 @@
 // Special abstract base class
 class Special {
 public:
-    // Constructor
     Special() {} // Default constructor
     virtual ~Special() {}
     // Returns total price of the items after the special. If price/num items are negative
@@ -19,14 +18,15 @@ protected:
 // BOGO X% off for items sold in whole units
 class BuyOneGetOneUnit : public Special {
 public:
-    // Constructor. PercentOff must be between [0, 100] else a default of 0% off is used.
-    BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent);
+    // Constructor. PercentOff must be between [0, 100] else a default of 0% off is used. Optional limit
+    BuyOneGetOneUnit(unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
     float calcPrice(float numItems, float price) const override;
 
 private:
     unsigned int mNeeded;   // Number of items needed to receive the special
     unsigned int mReceive;  // How many items receive the discount
     float mPercentOff;  // Percentage off of base price (as decimal [0,1])
+    unsigned int mLimit; // Limit on number of items available per special. 0 = no limit
 };
 
 // BOGO X% off for items sold in weight units
@@ -41,6 +41,7 @@ private:
     float mNeeded;   // Weight of items needed to receive the special
     float mReceive;  // How much weight to receive the discount
     float mPercentOff;  // Percentage off of base price (as decimal [0,1])
+    // float mLimit; // Limit on number of items available per special. 0 = no limit
 };
 
 class NforX : public Special {
@@ -52,6 +53,7 @@ public:
 private:
     unsigned int mNeeded; // Number of items needed to receive the special
     float mDiscPrice;    // Price of special items
+    // unsigned int mLimit; // Limit on number of items available per special. 0 = nolimit
 };
 
 #endif

@@ -556,6 +556,7 @@ TEST(SpecialTests, BuyOneGetOneXPercentWeightTwoSpecialsLesserAmount) {
     delete sp;
 }
 
+// Use case 5
 TEST(SpecialTests, NforXNotEnough) {
     unsigned int numNeeded = 3;
     float basePrice = 5.5;
@@ -601,5 +602,48 @@ TEST(SpecialTests, NforXMultipleAndExtra) {
     Special *sp = new NforX(numNeeded, discPrice);
     float total = sp->calcPrice(numItems, basePrice);
     ASSERT_FLOAT_EQ(numNeeded * 2 * discPrice + (numItems - numNeeded * 2) * basePrice, total);
+    delete sp;
+}
+
+// Use case 6
+TEST(SpecialTests, BuyOneGetOneFreeUnitLimitUnderSpecial) {
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
+    float percentOff = 100;
+    unsigned int numItems = 2;
+    float price = 1.5;
+    unsigned int limit = 1;
+
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff, limit);
+    float total = sp->calcPrice(numItems, price); // Illogical, but since limit is one no items meet special qualifier so all base price
+    ASSERT_FLOAT_EQ(numItems * price, total);
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitLimitEqual) {
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
+    float percentOff = 100;
+    unsigned int numItems = 6;
+    float price = 1.5;
+    unsigned int limit = 6;
+
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff, limit);
+    float total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ((numItems-(numReceived*2)) * price, total); // 2 free items reach limit
+    delete sp;
+}
+
+TEST(SpecialTests, BuyOneGetOneFreeUnitLimitExceeded) {
+    unsigned int numNeeded = 2;
+    unsigned int numReceived = 1;
+    float percentOff = 100;
+    unsigned int numItems = 6;
+    float price = 1.5;
+    unsigned int limit = 3;
+
+    Special *sp = new BuyOneGetOneUnit(numNeeded, numReceived, percentOff, limit);
+    float total = sp->calcPrice(numItems, price);
+    ASSERT_FLOAT_EQ((numItems-numReceived) * price, total); // Onle 1 discount allowed as limit reached
     delete sp;
 }

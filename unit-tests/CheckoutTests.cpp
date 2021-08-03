@@ -703,3 +703,42 @@ TEST(SpecialTests, BuyOneGetOneFreeWeightLimitBetweenNeededAndReceived) {
     ASSERT_FLOAT_EQ((weightItems-(limit-weightNeeded)) * price, total); // Onle partial discount allowed as limit reached
     delete sp;
 }
+
+TEST(SpecialTests, NforXLimitUnderSpecial) {
+    unsigned int numNeeded = 3;
+    float basePrice = 10.4;
+    unsigned int numItems = 3;
+    float discPrice = 6.79;
+    unsigned int limit = 2;
+
+    Special *sp = new NforX(numNeeded, discPrice, limit);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numItems * basePrice, total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXLimitEqual) {
+    unsigned int numNeeded = 3;
+    float basePrice = 10.4;
+    unsigned int numItems = 6;
+    float discPrice = 6.79;
+    unsigned int limit = 6;
+
+    Special *sp = new NforX(numNeeded, discPrice, limit);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ(numItems * discPrice, total);
+    delete sp;
+}
+
+TEST(SpecialTests, NforXLimitExceeded) {
+    unsigned int numNeeded = 3;
+    float basePrice = 10.4;
+    unsigned int numItems = 7;
+    float discPrice = 6.79;
+    unsigned int limit = 3;
+
+    Special *sp = new NforX(numNeeded, discPrice, limit);
+    float total = sp->calcPrice(numItems, basePrice);
+    ASSERT_FLOAT_EQ((numItems - limit) * basePrice + numNeeded * discPrice, total);
+    delete sp;
+}

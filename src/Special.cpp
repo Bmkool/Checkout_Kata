@@ -89,8 +89,8 @@ float BuyOneGetOneWeight::calcPrice(float weight, float price) const {
     return total;
 }
 
-NforX::NforX(unsigned int needed, float disc_price) :
-     mNeeded(needed), mDiscPrice(disc_price)
+NforX::NforX(unsigned int needed, float disc_price, unsigned int limit) :
+     mNeeded(needed), mDiscPrice(disc_price), mLimit(limit)
 {}
 
 float NforX::calcPrice(float numItems, float price) const {
@@ -99,11 +99,17 @@ float NforX::calcPrice(float numItems, float price) const {
     // Convert numItems to int
     unsigned int numItemsInt = static_cast<unsigned int>(numItems);
 
+    // Determine how many are overlimit and remove those from special calculation
+    unsigned int overLimit = 0;
+    if (mLimit > 0) {
+        overLimit = numItemsInt - mLimit;
+        numItemsInt -= overLimit;
+    }
     // Find how many specials are applicable
     unsigned int specials = numItemsInt / mNeeded;
 
     // Retrieve leftover items
     numItemsInt %= mNeeded;
 
-    return  specials * mNeeded * mDiscPrice +  numItemsInt * price;
+    return  specials * mNeeded * mDiscPrice + (numItemsInt + overLimit) * price;
 }

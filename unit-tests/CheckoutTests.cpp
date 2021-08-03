@@ -7,6 +7,8 @@
 #include "../src/Order.hpp"
 #include "../src/Special.hpp"
 
+/*************************** Item Tests **************************************/
+
 TEST(ItemTests, GetItemName) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
     ASSERT_EQ("Chips", chip.getName());
@@ -69,6 +71,8 @@ TEST(ItemTests, SetGetSpecial) {
     chip.setSpecial(nullptr);
     ASSERT_EQ(nullptr, chip.getSpecial());
 }
+
+/*************************** Database Tests **********************************/
 
 TEST(DatabaseTests, InsertIntoDatabase) {
     Item chip("Chips", Item::Sale_t::Unit, 3);
@@ -219,6 +223,8 @@ TEST(DatabaseTests, SetItemSpecialNforXSuccess) {
     // Special exists
     ASSERT_NE(nullptr, db.getItem("Chips")->getSpecial());
 }
+
+/***************************** Order Tests ***********************************/
 
 TEST(OrderTests, ScanItemUnitNotInDatabase) {
     ItemDatabase db;
@@ -483,6 +489,7 @@ TEST(OrderTests, AddItemSpecialRemoveItemInvalidateSpecialWeight) {
     ASSERT_FLOAT_EQ(1.5 * (.75 - .3), ord.getTotalPrice());
 }
 
+/***************************** Special Tests *********************************/
 
 TEST(SpecialTests, BuyOneGetOneFreeUnitInvalidPercentPrice) {
     unsigned int numNeeded = 2;
@@ -933,8 +940,9 @@ TEST(SpecialTests, NforXLimitExceeded) {
     delete sp;
 }
 
+/***************************** Integration Tess ******************************/
 
-// Integration test with shopping cart consisting of multiple items, specials, etc
+// Integration test with shopping cart consisting of multiple items, specials, markdown, etc
 TEST(IntegrationTest, FullShoppingCartLargeOrder) {
     // Setup Database and specials
     ItemDatabase db;

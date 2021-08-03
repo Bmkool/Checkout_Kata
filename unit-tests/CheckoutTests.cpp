@@ -162,6 +162,64 @@ TEST(DatabaseTests, SetItemSpecialUnitBOGOSuccess) {
     ASSERT_NE(nullptr, db.getItem("Chips")->getSpecial());
 }
 
+TEST(DatabaseTests, SetItemSpecialWeightBOGONotInDatabase) {
+    Item apple("Apple", Item::Sale_t::Weight, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_FALSE(db.setItemSpecial("Apple", 3.0f, 2.0f, 20));
+}
+
+TEST(DatabaseTests, SetItemSpecialWeightBOGONotUnit) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_FALSE(db.setItemSpecial("Chips", 3.0f, 2.0f, 20));
+}
+
+TEST(DatabaseTests, SetItemSpecialWeightBOGOSuccess) {
+    Item apple("Apple", Item::Sale_t::Weight, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(apple));
+    ASSERT_TRUE(db.setItemSpecial("Apple", 3.0f, 2.0f, 20));
+
+    // Special exists
+    ASSERT_NE(nullptr, db.getItem("Apple")->getSpecial());
+}
+
+TEST(DatabaseTests, SetItemSpecialNforXNotInDatabase) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_FALSE(db.setItemSpecial("Chips", 3U, 2.5f));
+}
+
+TEST(DatabaseTests, SetItemSpecialNforXNotUnit) {
+    Item apple("Apple", Item::Sale_t::Weight, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(apple));
+    ASSERT_FALSE(db.setItemSpecial("Apple", 3U, 2.5f));
+}
+
+TEST(DatabaseTests, SetItemSpecialNforXSuccess) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_TRUE(db.setItemSpecial("Chips", 3U, 2.5f));
+
+    // Special exists
+    ASSERT_NE(nullptr, db.getItem("Chips")->getSpecial());
+}
+
 TEST(OrderTests, ScanItemUnitNotInDatabase) {
     ItemDatabase db;
     Order ord(db);

@@ -31,10 +31,10 @@ public:
     bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
 
     // Set the BOGO special for Weight
-    // bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
+    bool setItemSpecial(const std::string& name, float needed, float receive, float percent, float limit = 0);
 
     // Set the NforX special
-    // bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
+    bool setItemSpecial(const std::string& name, unsigned int needed, float price, unsigned int limit = 0);
 
 private:
     std::vector<Item> mItems; // Items in database

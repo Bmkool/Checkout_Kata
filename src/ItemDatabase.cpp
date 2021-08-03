@@ -65,3 +65,43 @@ bool ItemDatabase::setItemSpecial(const std::string& name, unsigned int needed, 
 
     return true;
 }
+
+bool ItemDatabase::setItemSpecial(const std::string& name, float needed, float receive, float percent, float limit) {
+    // Find item in database
+    auto item = std::find_if(mItems.begin(), mItems.end(), [&name](const Item& obj) { return obj.getName() == name; });
+    if (item == mItems.end()) {
+        // Item not in database
+        std::cerr << "Item not found" << std::endl;
+        return false;
+    }
+
+    if (Item::Sale_t::Unit == item->getSaleType()) {
+        std::cerr << "Item not sold by weight" << std::endl;
+        return false;
+    }
+
+    // Create the BOGO special
+    item->setSpecial(std::make_shared<BuyOneGetOneWeight>(needed, receive, percent, limit));
+
+    return true;
+}
+
+bool ItemDatabase::setItemSpecial(const std::string& name, unsigned int needed, float price, unsigned int limit) {
+    // Find item in database
+    auto item = std::find_if(mItems.begin(), mItems.end(), [&name](const Item& obj) { return obj.getName() == name; });
+    if (item == mItems.end()) {
+        // Item not in database
+        std::cerr << "Item not found" << std::endl;
+        return false;
+    }
+
+    if (Item::Sale_t::Weight == item->getSaleType()) {
+        std::cerr << "Item not sold by unit" << std::endl;
+        return false;
+    }
+
+    // Create the BOGO special
+    item->setSpecial(std::make_shared<NforX>(needed, price, limit));
+
+    return true;
+}

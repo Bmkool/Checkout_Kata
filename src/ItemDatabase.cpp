@@ -6,7 +6,6 @@
 std::optional<Item> ItemDatabase::getItem(const std::string& name) const {
     auto it = std::find_if(mItems.begin(), mItems.end(), [&name](const Item& obj) { return obj.getName() == name; });
     if (it == mItems.end()) {
-        std::cerr << "Item not found" << std::endl;
         return std::nullopt;
     }
     return *it;
@@ -45,4 +44,24 @@ bool ItemDatabase::setItemMarkdown(const std::string& name, float markdown) {
     }
 
     return item->setMarkdown(markdown);
+}
+
+bool ItemDatabase::setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit) {
+    // Find item in database
+    auto item = std::find_if(mItems.begin(), mItems.end(), [&name](const Item& obj) { return obj.getName() == name; });
+    if (item == mItems.end()) {
+        // Item not in database
+        std::cerr << "Item not found" << std::endl;
+        return false;
+    }
+
+    if (Item::Sale_t::Weight == item->getSaleType()) {
+        std::cerr << "Item not sold by unit" << std::endl;
+        return false;
+    }
+
+    // Create the BOGO special
+    item->setSpecial(std::make_shared<BuyOneGetOneUnit>(needed, receive, percent, limit));
+
+    return true;
 }

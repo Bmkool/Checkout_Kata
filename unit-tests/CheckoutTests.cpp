@@ -133,6 +133,35 @@ TEST(DatabaseTests, SetItemMarkdownSuccess) {
     ASSERT_FLOAT_EQ(2.5, db.getItem("Chips")->getMarkdown());
 }
 
+TEST(DatabaseTests, SetItemSpecialUnitBOGONotInDatabase) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_FALSE(db.setItemSpecial("Chips", 3U, 2U, 20));
+}
+
+TEST(DatabaseTests, SetItemSpecialUnitBOGONotUnit) {
+    Item apple("Apple", Item::Sale_t::Weight, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(apple));
+    ASSERT_FALSE(db.setItemSpecial("Apple", 3U, 2U, 20));
+}
+
+TEST(DatabaseTests, SetItemSpecialUnitBOGOSuccess) {
+    Item chip("Chips", Item::Sale_t::Unit, 3);
+    ItemDatabase db;
+
+    // Not in database
+    ASSERT_TRUE(db.insertItem(chip));
+    ASSERT_TRUE(db.setItemSpecial("Chips", 3U, 2U, 20));
+
+    // Special exists
+    ASSERT_NE(nullptr, db.getItem("Chips")->getSpecial());
+}
+
 TEST(OrderTests, ScanItemUnitNotInDatabase) {
     ItemDatabase db;
     Order ord(db);

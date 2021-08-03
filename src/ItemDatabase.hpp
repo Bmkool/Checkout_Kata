@@ -27,6 +27,15 @@ public:
     // and item must be in database
     bool setItemMarkdown(const std::string& name, float price);
 
+    // Set the BOGO special for Unit
+    bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
+
+    // Set the BOGO special for Weight
+    // bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
+
+    // Set the NforX special
+    // bool setItemSpecial(const std::string& name, unsigned int needed, unsigned int receive, float percent, unsigned int limit = 0);
+
 private:
     std::vector<Item> mItems; // Items in database
 };

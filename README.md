@@ -4,7 +4,7 @@
 - Tested on Ubuntu 18.04
 
 # Building
-Run: `cmake -B build -S src && make -C build`
+Run: `cmake -B build -S . && make -C build`
 
 # Running
 
